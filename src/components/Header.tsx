@@ -1,12 +1,34 @@
-import { useEffect, useMemo } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAppStore } from "../stores/useAppStore";
 
 export default function Header() {
+  const [searchFilters, setSearchFilters] = useState({
+    ingredient: "",
+    category: "",
+  });
+
   const { pathname } = useLocation();
-  const { fetchCategories, categories } = useAppStore();
+  const { fetchCategories, categories, searchRecipes } = useAppStore();
 
   const isHome = useMemo(() => pathname === "/", [pathname]);
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>
+  ) => {
+    setSearchFilters({ ...searchFilters, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // TODO: validation
+    if (Object.values(searchFilters).includes("")) {
+      console.log("Todos los campos son obligatorios");
+      return;
+    }
+    // request
+    searchRecipes(searchFilters);
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -44,7 +66,10 @@ export default function Header() {
           </nav>
         </div>
         {isHome && (
-          <form className="bg-orange-400 my-32 p-10 rounded-lg shadow space-y-6 md:w-1/2 2xl:w-1/3">
+          <form
+            className="bg-orange-400 my-32 p-10 rounded-lg shadow space-y-6 md:w-1/2 2xl:w-1/3"
+            onSubmit={handleSubmit}
+          >
             <div className="space-y-4">
               <label
                 htmlFor="ingredient"
@@ -58,6 +83,8 @@ export default function Header() {
                 name="ingredient"
                 className="p-3 w-full rounded-md focus:outline-none"
                 placeholder="Ej: Vodka"
+                value={searchFilters.ingredient}
+                onChange={handleChange}
               />
             </div>
             <div className="space-y-4">
@@ -71,6 +98,8 @@ export default function Header() {
                 id="category"
                 name="category"
                 className="p-3 w-full rounded-md focus:outline-none"
+                value={searchFilters.ingredient}
+                onChange={handleChange}
               >
                 <option value="">Seleccione una categoría</option>
                 {categories.drinks.map((category) => (
