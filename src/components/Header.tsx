@@ -9,7 +9,13 @@ export default function Header() {
   });
 
   const { pathname } = useLocation();
-  const { fetchCategories, categories, searchRecipes } = useAppStore();
+  const {
+    fetchCategories,
+    categories,
+    searchRecipes,
+    showNotification,
+    hideNotification,
+  } = useAppStore();
 
   const isHome = useMemo(() => pathname === "/", [pathname]);
 
@@ -21,9 +27,15 @@ export default function Header() {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: validation
+    // Validation
     if (Object.values(searchFilters).includes("")) {
-      console.log("Todos los campos son obligatorios");
+      showNotification({
+        text: "Todos los campos son obligatorios",
+        error: true,
+      });
+      setTimeout(() => {
+        hideNotification();
+      }, 3000);
       return;
     }
     // request
